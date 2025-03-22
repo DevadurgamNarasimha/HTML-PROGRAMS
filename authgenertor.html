@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Authentication ID Generator</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f5f7fa;
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+    
+    .container {
+      background-color: #ffffff;
+      border-radius: 10px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+      width: 100%;
+      max-width: 600px;
+      padding: 30px;
+    }
+    
+    h1 {
+      color: #2d3748;
+      margin-top: 0;
+      text-align: center;
+      margin-bottom: 25px;
+      font-size: 24px;
+    }
+    
+    .input-group {
+      margin-bottom: 20px;
+    }
+    
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+      color: #4a5568;
+    }
+    
+    input {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
+      font-size: 16px;
+      transition: border-color 0.2s;
+      box-sizing: border-box;
+    }
+    
+    input:focus {
+      outline: none;
+      border-color: #4299e1;
+      box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.2);
+    }
+    
+    button {
+      background-color: #4299e1;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      padding: 12px 16px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      width: 100%;
+      transition: background-color 0.2s;
+    }
+    
+    button:hover {
+      background-color: #3182ce;
+    }
+    
+    .result {
+      margin-top: 25px;
+      padding-top: 20px;
+      border-top: 1px solid #e2e8f0;
+      display: none;
+    }
+    
+    .result-item {
+      margin-bottom: 15px;
+    }
+    
+    .result-label {
+      font-weight: 600;
+      margin-bottom: 5px;
+      color: #4a5568;
+    }
+    
+    .result-value {
+      background-color: #f7fafc;
+      padding: 12px;
+      border-radius: 6px;
+      border: 1px solid #e2e8f0;
+      font-family: monospace;
+      word-break: break-all;
+    }
+    
+    .copy-btn {
+      background-color: #48bb78;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      padding: 8px 12px;
+      font-size: 14px;
+      cursor: pointer;
+      margin-top: 8px;
+      transition: background-color 0.2s;
+    }
+    
+    .copy-btn:hover {
+      background-color: #38a169;
+    }
+    
+    .api-link {
+      color: #4299e1;
+      text-decoration: none;
+      word-break: break-all;
+    }
+    
+    .api-link:hover {
+      text-decoration: underline;
+    }
+    
+    .steps-toggle {
+      background-color: transparent;
+      color: #4299e1;
+      border: 1px solid #4299e1;
+      margin-top: 15px;
+    }
+    
+    .steps-toggle:hover {
+      background-color: #ebf8ff;
+    }
+    
+    .steps {
+      margin-top: 20px;
+      background-color: #f7fafc;
+      border-radius: 6px;
+      padding: 15px;
+      display: none;
+    }
+    
+    .step {
+      margin-bottom: 12px;
+    }
+    
+    .step-title {
+      font-weight: 600;
+      margin-bottom: 5px;
+      color: #4a5568;
+    }
+    
+    .error {
+      color: #e53e3e;
+      margin-top: 5px;
+      font-size: 14px;
+      display: none;
+    }
+    
+    .test-btn {
+      background-color: #805ad5;
+      margin-top: 10px;
+    }
+    
+    .test-btn:hover {
+      background-color: #6b46c1;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Authentication ID Generator</h1>
+    
+    <div class="input-group">
+      <label for="studentCode">Student Code:</label>
+      <input type="text" id="studentCode" placeholder="e.g., fs39_330654" required>
+      <div id="studentCodeError" class="error">Please enter your student code</div>
+    </div>
+    
+    <div class="input-group">
+      <label for="email">Email Address:</label>
+      <input type="email" id="email" placeholder="e.g., example@gmail.com" required>
+      <div id="emailError" class="error">Please enter a valid email address</div>
+    </div>
+    
+    <button id="generateBtn">Generate Authentication ID</button>
+    
+    <div id="result" class="result">
+      <div class="result-item">
+        <div class="result-label">Authentication ID:</div>
+        <div class="result-value" id="authID"></div>
+        <button class="copy-btn" id="copyAuthBtn">Copy ID</button>
+      </div>
+      
+      <div class="result-item">
+        <div class="result-label">API URL:</div>
+        <div class="result-value">
+          <a id="apiUrl" class="api-link" target="_blank"></a>
+        </div>
+        <button class="copy-btn" id="copyUrlBtn">Copy URL</button>
+        <button class="copy-btn test-btn" id="testUrlBtn">Test URL</button>
+      </div>
+      
+      <button class="steps-toggle" id="showStepsBtn">Show Calculation Steps</button>
+      
+      <div id="steps" class="steps">
+        <div class="step">
+          <div class="step-title">Step 1: Split Email</div>
+          <div id="step1"></div>
+        </div>
+        
+        <div class="step">
+          <div class="step-title">Step 2: Concatenate Strings</div>
+          <div id="step2"></div>
+        </div>
+        
+        <div class="step">
+          <div class="step-title">Step 3: Character Conversion</div>
+          <div id="step3"></div>
+        </div>
+        
+        <div class="step">
+          <div class="step-title">Step 4: Remove Prime Numbers</div>
+          <div id="step4"></div>
+        </div>
+        
+        <div class="step">
+          <div class="step-title">Step 5: Final Result (After Removing Duplicates)</div>
+          <div id="step5"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function generateAuthID(studentCode, email) {
+      const [username, domain] = email.split('@');
+      
+      document.getElementById('step1').textContent = 'Username: "${username}", Domain: "${domain}"';
+      const concatenatedString = username + studentCode + domain;
+      
+      document.getElementById('step2').textContent = 'Concatenated string: "${concatenatedString}"';
+      let convertedString = '';
+      let conversionDetails = '';
+      
+      for (let i = 0; i < concatenatedString.length; i++) {
+        const char = concatenatedString[i].toLowerCase();
+        let convertedChar;
+        
+        if (/[a-z]/.test(char)) {
+          
+          convertedChar = (char.charCodeAt(0) - 96);
+          conversionDetails += `${char}->${convertedChar}, `;
+        } 
+       
+        else if (/[0-9]/.test(char)) {
+          
+          convertedChar = char;
+          conversionDetails += `${char}->${convertedChar} (number), `;
+        } 
+       
+        else {
+         
+          convertedChar = '1';
+          conversionDetails += `${char}->1 (special character), `;
+        }
+        
+        convertedString += convertedChar;
+      }      
+      document.getElementById('step3').innerHTML = `
+        <div>${conversionDetails}</div>
+        <div><strong>Converted string:</strong> "${convertedString}"</div>
+      `;
+      let nonPrimeString = '';
+      let primeRemovalDetails = '';
+      
+      for (let i = 0; i < convertedString.length; i++) {
+        const num = parseInt(convertedString[i]);
+        
+        if (num === 0 || num === 1 || num === 4 || num === 6 || num === 8 || num === 9) {
+          nonPrimeString += num;
+          primeRemovalDetails += `${num} (kept - not prime), `;
+        } else {
+          primeRemovalDetails += `${num} (removed - prime), `;
+        }
+      }
+            document.getElementById('step4').innerHTML = `
+        <div>${primeRemovalDetails}</div>
+        <div><strong>After removing primes:</strong> "${nonPrimeString}"</div>
+      `;
+      const frequencyMap = {};
+      
+      for (let i = 0; i < nonPrimeString.length; i++) {
+        const char = nonPrimeString[i];
+        frequencyMap[char] = (frequencyMap[char] || 0) + 1;
+      }
+          let authID = '';
+      let frequencyDetails = 'Character frequencies: ';
+      
+      for (const [char, freq] of Object.entries(frequencyMap)) {
+        frequencyDetails += `${char}:${freq}, `;
+      }
+      
+      let uniqueDetails = '';
+      
+      for (let i = 0; i < nonPrimeString.length; i++) {
+        const char = nonPrimeString[i];
+        if (frequencyMap[char] === 1) {
+          authID += char;
+          uniqueDetails += `${char} (kept - appears once), `;
+        } else {
+          uniqueDetails += `${char} (removed - appears multiple times), `;
+        }
+      }
+          document.getElementById('step5').innerHTML = `
+        <div>${frequencyDetails}</div>
+        <div>${uniqueDetails}</div>
+        <div><strong>Final authentication ID:</strong> "${authID}"</div>
+      `;
+      
+      return authID;
+    }
+    function getAPIUrl(authID) {
+      return 'https://questionmapping.onrender.com/api/problem/${authID}';
+    }
+    function isValidEmail(email) {
+      const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      return emailPattern.test(email);
+    }
+    function isValidStudentCode(code) {
+      return code.trim() !== '';
+    }
+    document.addEventListener('DOMContentLoaded', function() {
+      const generateBtn = document.getElementById('generateBtn');
+      const showStepsBtn = document.getElementById('showStepsBtn');
+      const copyAuthBtn = document.getElementById('copyAuthBtn');
+      const copyUrlBtn = document.getElementById('copyUrlBtn');
+      const testUrlBtn = document.getElementById('testUrlBtn');
+      
+      generateBtn.addEventListener('click', function() {
+        const studentCode = document.getElementById('studentCode').value;
+        const email = document.getElementById('email').value;
+        const studentCodeError = document.getElementById('studentCodeError');
+        const emailError = document.getElementById('emailError');
+        studentCodeError.style.display = 'none';
+        emailError.style.display = 'none';
+        let isValid = true;
+        
+        if (!isValidStudentCode(studentCode)) {
+          studentCodeError.style.display = 'block';
+          isValid = false;
+        }
+        
+        if (!isValidEmail(email)) {
+          emailError.style.display = 'block';
+          isValid = false;
+        }
+        
+        if (!isValid) return;
+        
+        const authID = generateAuthID(studentCode, email);
+        const apiUrl = getAPIUrl(authID);
+        
+        document.getElementById('authID').textContent = authID;
+        const apiUrlElement = document.getElementById('apiUrl');
+        apiUrlElement.textContent = apiUrl;
+        apiUrlElement.href = apiUrl;
+        
+        document.getElementById('result').style.display = 'block';
+      });
+      
+      showStepsBtn.addEventListener('click', function() {
+        const stepsSection = document.getElementById('steps');
+        if (stepsSection.style.display === 'block') {
+          stepsSection.style.display = 'none';
+          showStepsBtn.textContent = 'Show Calculation Steps';
+        } else {
+          stepsSection.style.display = 'block';
+          showStepsBtn.textContent = 'Hide Calculation Steps';
+        }
+      });
+      
+      copyAuthBtn.addEventListener('click', function() {
+        const authID = document.getElementById('authID').textContent;
+        navigator.clipboard.writeText(authID)
+          .then(() => {
+            copyAuthBtn.textContent = 'Copied!';
+            setTimeout(() => {
+              copyAuthBtn.textContent = 'Copy ID';
+            }, 2000);
+          })
+          .catch(err => {
+            copyAuthBtn.textContent = 'Copy Failed';
+            setTimeout(() => {
+              copyAuthBtn.textContent = 'Copy ID';
+            }, 2000);
+          });
+      });
+      
+      copyUrlBtn.addEventListener('click', function() {
+        const apiUrl = document.getElementById('apiUrl').textContent;
+        navigator.clipboard.writeText(apiUrl)
+          .then(() => {
+            copyUrlBtn.textContent = 'Copied!';
+            setTimeout(() => {
+              copyUrlBtn.textContent = 'Copy URL';
+            }, 2000);
+          })
+          .catch(err => {
+            copyUrlBtn.textContent = 'Copy Failed';
+            setTimeout(() => {
+              copyUrlBtn.textContent = 'Copy URL';
+            }, 2000);
+          });
+      });
+      
+      testUrlBtn.addEventListener('click', function() {
+        const apiUrl = document.getElementById('apiUrl').href;
+        window.open(apiUrl, '_blank');
+      });
+    });
+  </script>
+</body>
+</html>
